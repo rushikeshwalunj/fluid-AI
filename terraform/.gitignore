@@ -1,0 +1,12 @@
+# Terraform state — contains resource details, never commit
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Your real values — commit only the .example file
+terraform.tfvars
+*.auto.tfvars
+
+# Crash logs
+crash.log
