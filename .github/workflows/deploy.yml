@@ -4,50 +4,13 @@ on:
   push:
     branches: [main]
 
-env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/devops-challenge-backend
-
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    outputs:
-      image_tag: ${{ steps.meta.outputs.tag }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set image tag
-        id: meta
-        run: echo "tag=${{ env.IMAGE_NAME }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./app
-          push: true
-          tags: |
-            ${{ steps.meta.outputs.tag }}
-            ${{ env.IMAGE_NAME }}:latest
-
-  deploy:
-    needs: build
-    # IMPORTANT: this job needs network access to your cluster's API server.
-    # - For a LOCAL cluster (minikube/kind/k3s), use a self-hosted runner on
-    #   the same machine as the cluster (Settings > Actions > Runners > New
-    #   self-hosted runner), then set: runs-on: self-hosted
-    # - For a cloud cluster (EKS/GKE/AKS), keep ubuntu-latest and add the
-    #   matching cloud-auth action (aws-actions/configure-aws-credentials,
-    #   google-github-actions/auth, azure/login) before the kubectl step.
+  build-and-deploy:
+    # This runner IS your EC2 box running Minikube — that's what lets this
+    # reach the cluster directly with no registry, no cloud auth, no
+    # exposed API server. See README for why self-hosted is required here.
     runs-on: self-hosted
+
     steps:
       - uses: actions/checkout@v4
 
@@ -56,11 +19,22 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
 
+      - name: Build image directly into Minikube
+        run: |
+          minikube image build -t devops-challenge-backend:${{ github.sha }} ./app
+          minikube image build -t devops-challenge-backend:latest ./app
+
       - name: Apply manifests
         run: kubectl apply -f k8s/
 
       - name: Roll out new image
         run: |
-          kubectl set image deployment/backend backend=${{ needs.build.outputs.image_tag }} \
+          kubectl set image deployment/backend backend=devops-challenge-backend:${{ github.sha }} \
             -n devops-challenge
           kubectl rollout status deployment/backend -n devops-challenge --timeout=120s
+
+      - name: Show final state
+        if: always()
+        run: |
+          kubectl get pods -n devops-challenge
+          kubectl get svc backend -n devops-challenge
