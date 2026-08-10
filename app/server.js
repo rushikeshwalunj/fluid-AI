@@ -1,8 +1,11 @@
 const express = require('express');
+const path = require('path');
 const { Pool } = require('pg');
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 const pool = new Pool({
   host: process.env.DB_HOST || 'postgres',
@@ -32,7 +35,7 @@ async function initDb() {
 initDb();
 
 // Main app route — proves the whole stack (app -> db) works end to end
-app.get('/', async (req, res) => {
+app.get('/api/visits', async (req, res) => {
   try {
     await pool.query('INSERT INTO visits (ts) VALUES (NOW())');
     const result = await pool.query('SELECT COUNT(*) FROM visits');
@@ -44,6 +47,10 @@ app.get('/', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // LIVENESS: "is the process itself stuck/dead?" — does NOT check the database.

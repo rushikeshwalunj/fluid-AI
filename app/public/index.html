@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluid AI Store</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">Fluid AI</div>
+    <div class="search-bar">
+      <input id="searchInput" type="text" placeholder="Search for products, brands and more" />
+      <button id="searchButton">Search</button>
+    </div>
+    <div class="cart">Cart (0)</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h1>Discover smart shopping with Fluid AI</h1>
+        <p>Browse recommended products, filters, and offers in a lightweight preview app.</p>
+      </div>
+      <button id="refreshButton">Refresh Visits</button>
+    </section>
+
+    <section class="status-card">
+      <div class="status-title">Backend status</div>
+      <div class="status-value" id="statusValue">Loading...</div>
+    </section>
+
+    <section class="product-grid" id="productGrid"></section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
