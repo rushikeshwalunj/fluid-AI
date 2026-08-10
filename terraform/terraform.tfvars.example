@@ -1,0 +1,2 @@
+key_name = "your-ec2-key-pair-name"
+my_ip    = "YOUR.PUBLIC.IP.HERE/32"
