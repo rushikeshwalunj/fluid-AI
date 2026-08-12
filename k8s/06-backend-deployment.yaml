@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
-  namespace: devops
+  namespace: devops-challenge
 spec:
   replicas: 2
   strategy:
@@ -21,7 +21,7 @@ spec:
       containers:
         - name: backend
           # Replace with your built image, e.g. ghcr.io/<you>/devops-challenge-backend:latest
-          image: devops-backend:latest
+          image: devops-challenge-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
