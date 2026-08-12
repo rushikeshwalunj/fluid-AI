@@ -21,7 +21,7 @@ spec:
       containers:
         - name: backend
           # Replace with your built image, e.g. ghcr.io/<you>/devops-challenge-backend:latest
-          image: devops-challenge-backend:latest
+          image: devops-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
